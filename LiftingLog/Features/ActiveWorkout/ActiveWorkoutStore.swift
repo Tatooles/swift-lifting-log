@@ -59,7 +59,11 @@ final class ActiveWorkoutStore: Identifiable {
     }
 
     func toggleExpandedExercise(_ id: UUID) {
-        expandedExerciseID = expandedExerciseID == id ? nil : id
+        expandedExerciseID = id
+    }
+
+    func updateWorkoutDate(_ date: Date) {
+        draft.date = date
     }
 
     func editableSet(for exerciseID: UUID) -> DraftSet {

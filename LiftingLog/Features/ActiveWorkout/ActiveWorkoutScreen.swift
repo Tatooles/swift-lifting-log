@@ -47,6 +47,13 @@ struct ActiveWorkoutScreen: View {
         )
     }
 
+    private var workoutDateBinding: Binding<Date> {
+        Binding(
+            get: { store.draft.date },
+            set: { store.updateWorkoutDate($0) }
+        )
+    }
+
     private var headerCard: some View {
         GlassSurface(cornerRadius: 32, padding: 22) {
             VStack(alignment: .leading, spacing: 16) {
@@ -55,10 +62,16 @@ struct ActiveWorkoutScreen: View {
                     .textInputAutocapitalization(.words)
 
                 HStack(spacing: 10) {
-                    MetadataPill(
-                        title: store.draft.date.formatted(date: .abbreviated, time: .omitted),
-                        systemImage: "calendar"
-                    )
+                    DatePicker(
+                        selection: workoutDateBinding,
+                        displayedComponents: [.date]
+                    ) {
+                        Label(
+                            store.draft.date.formatted(date: .abbreviated, time: .omitted),
+                            systemImage: "calendar"
+                        )
+                    }
+                    .datePickerStyle(.compact)
 
                     MetadataPill(
                         title: "\(store.draft.exercises.count) exercises",

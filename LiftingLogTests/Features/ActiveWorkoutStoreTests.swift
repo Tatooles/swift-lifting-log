@@ -17,6 +17,30 @@ final class ActiveWorkoutStoreTests: XCTestCase {
         XCTAssertEqual(activeStore.expandedExerciseID, secondID)
     }
 
+    func testTappingExpandedExerciseKeepsItExpanded() throws {
+        let store = MockWorkoutStore.sample
+        let activeStore = ActiveWorkoutStore(store: store)
+        activeStore.addExercise(named: "Bench Press")
+
+        let exerciseID = try XCTUnwrap(activeStore.draft.exercises.first?.id)
+
+        activeStore.toggleExpandedExercise(exerciseID)
+        activeStore.toggleExpandedExercise(exerciseID)
+
+        XCTAssertEqual(activeStore.expandedExerciseID, exerciseID)
+    }
+
+    func testUpdateWorkoutDateMutatesTheDraftDate() {
+        let store = MockWorkoutStore.sample
+        let originalDate = Date(timeIntervalSince1970: 2_000)
+        let updatedDate = Date(timeIntervalSince1970: 5_000)
+        let activeStore = ActiveWorkoutStore(store: store, now: originalDate)
+
+        activeStore.updateWorkoutDate(updatedDate)
+
+        XCTAssertEqual(activeStore.draft.date, updatedDate)
+    }
+
     func testFinishWorkoutPreservesNewestFirstOrdering() {
         let store = MockWorkoutStore(
             workouts: [
