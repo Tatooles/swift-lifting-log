@@ -1,10 +1,24 @@
 import SwiftUI
 
 struct WorkoutTimerBar: View {
+    enum Style {
+        case fullWidth
+        case inline
+    }
+
     let startedAt: Date
+    var style: Style = .fullWidth
 
     var body: some View {
         TimelineView(.periodic(from: startedAt, by: 1)) { context in
+            timerContent(now: context.date)
+        }
+    }
+
+    @ViewBuilder
+    private func timerContent(now: Date) -> some View {
+        switch style {
+        case .fullWidth:
             GlassSurface(cornerRadius: 22, padding: 14, tint: AppTheme.accent.opacity(0.2)) {
                 HStack(spacing: 12) {
                     Image(systemName: "timer")
@@ -16,12 +30,23 @@ struct WorkoutTimerBar: View {
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
 
-                        Text(elapsedText(since: startedAt, now: context.date))
+                        Text(elapsedText(since: startedAt, now: now))
                             .font(.title3.monospacedDigit().weight(.semibold))
                     }
 
                     Spacer()
                 }
+            }
+
+        case .inline:
+            HStack(spacing: 8) {
+                Image(systemName: "timer")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.accent)
+
+                Text(elapsedText(since: startedAt, now: now))
+                    .font(.headline.monospacedDigit().weight(.semibold))
+                    .foregroundStyle(.primary)
             }
         }
     }
@@ -41,7 +66,10 @@ struct WorkoutTimerBar: View {
 }
 
 #Preview {
-    WorkoutTimerBar(startedAt: .now.addingTimeInterval(-812))
-        .padding()
-        .background(AppTheme.pageBackground)
+    VStack(alignment: .leading, spacing: 16) {
+        WorkoutTimerBar(startedAt: .now.addingTimeInterval(-812))
+        WorkoutTimerBar(startedAt: .now.addingTimeInterval(-812), style: .inline)
+    }
+    .padding()
+    .background(AppTheme.pageBackground)
 }
