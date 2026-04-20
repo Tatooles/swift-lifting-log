@@ -90,7 +90,7 @@ struct ExerciseCardView: View {
 
     @ViewBuilder
     private var expandedContent: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             priorPerformanceStrip
 
             ForEach(Array(completedSets.enumerated()), id: \.element.id) { index, set in
@@ -99,7 +99,6 @@ struct ExerciseCardView: View {
                     repsText: set.repsText,
                     weightText: set.weightText,
                     rpe: set.rpe,
-                    notesText: set.notes,
                     isEditable: false
                 )
             }
@@ -109,41 +108,37 @@ struct ExerciseCardView: View {
                 repsText: editableSet.repsText,
                 weightText: editableSet.weightText,
                 rpe: editableSet.rpe,
-                notesText: editableSet.notes,
                 isEditable: true,
                 onRepsChange: { updateEditableSet(repsText: $0) },
                 onWeightChange: { updateEditableSet(weightText: $0) },
-                onRPEChange: { updateEditableSet(rpe: .some($0)) },
-                onNotesChange: { updateEditableSet(notes: $0) }
+                onRPEChange: { updateEditableSet(rpe: .some($0)) }
             )
 
-            Button {
-                isHistoryPresented = true
-            } label: {
-                Label("Open Full History", systemImage: "clock.arrow.circlepath")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .disabled(historyEntries.isEmpty)
+            exerciseNotesField
 
-            HStack(spacing: 12) {
+            HStack(spacing: 8) {
+                Button("History") {
+                    isHistoryPresented = true
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(historyEntries.isEmpty)
+
                 Button {
                     store.completePendingSet(for: exercise.id)
                 } label: {
-                    Label("Log Set", systemImage: "checkmark.circle.fill")
+                    Text("Log Set")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(AppTheme.accent)
                 .disabled(editableSet.isBlank)
 
-                Button(role: .destructive) {
+                Button("Remove", role: .destructive) {
                     store.removeExercise(exercise.id)
-                } label: {
-                    Label("Remove", systemImage: "trash")
-                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
+                .controlSize(.small)
             }
         }
     }
@@ -151,16 +146,43 @@ struct ExerciseCardView: View {
     private func updateEditableSet(
         repsText: String? = nil,
         weightText: String? = nil,
-        rpe: Double?? = nil,
-        notes: String? = nil
+        rpe: Double?? = nil
     ) {
         store.updateEditableSet(
             for: exercise.id,
             repsText: repsText,
             weightText: weightText,
-            rpe: rpe,
-            notes: notes ?? editableSet.notes
+            rpe: rpe
         )
+    }
+
+    private var exerciseNotesField: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Notes")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            TextField(
+                "Exercise notes",
+                text: Binding(
+                    get: { exercise.notes },
+                    set: { store.updateExerciseNotes(for: exercise.id, notes: $0) }
+                ),
+                axis: .vertical
+            )
+            .lineLimit(1 ... 3)
+            .textInputAutocapitalization(.sentences)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(.systemBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(Color(.separator).opacity(0.18), lineWidth: 1)
+            )
+        }
     }
 
     @ViewBuilder

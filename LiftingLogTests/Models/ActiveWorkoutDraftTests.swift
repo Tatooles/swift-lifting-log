@@ -11,8 +11,7 @@ final class ActiveWorkoutDraftTests: XCTestCase {
             for: exerciseID,
             repsText: "",
             weightText: "225",
-            rpe: nil,
-            notes: ""
+            rpe: nil
         )
 
         XCTAssertEqual(draft.exercises[0].loggedSets.count, 1)
@@ -30,8 +29,7 @@ final class ActiveWorkoutDraftTests: XCTestCase {
             for: exerciseID,
             repsText: "",
             weightText: "225",
-            rpe: nil,
-            notes: ""
+            rpe: nil
         )
 
         let firstSetID = try XCTUnwrap(draft.exercises[0].loggedSets.first?.id)
@@ -40,8 +38,7 @@ final class ActiveWorkoutDraftTests: XCTestCase {
             for: exerciseID,
             repsText: "5",
             weightText: "225",
-            rpe: 8,
-            notes: "top set"
+            rpe: 8
         )
 
         XCTAssertEqual(draft.exercises[0].loggedSets.count, 1)
@@ -49,7 +46,6 @@ final class ActiveWorkoutDraftTests: XCTestCase {
         XCTAssertEqual(draft.exercises[0].loggedSets[0].repsText, "5")
         XCTAssertEqual(draft.exercises[0].loggedSets[0].weightText, "225")
         XCTAssertEqual(draft.exercises[0].loggedSets[0].rpe, 8)
-        XCTAssertEqual(draft.exercises[0].loggedSets[0].notes, "top set")
         XCTAssertFalse(draft.exercises[0].loggedSets[0].isComplete)
     }
 
@@ -62,8 +58,7 @@ final class ActiveWorkoutDraftTests: XCTestCase {
             for: exerciseID,
             repsText: "",
             weightText: "",
-            rpe: nil,
-            notes: ""
+            rpe: nil
         )
 
         XCTAssertTrue(draft.exercises[0].loggedSets.isEmpty)
@@ -78,8 +73,7 @@ final class ActiveWorkoutDraftTests: XCTestCase {
             for: exerciseID,
             repsText: "3",
             weightText: "315",
-            rpe: 9,
-            notes: "top set"
+            rpe: 9
         )
 
         let materializedSetID = try XCTUnwrap(draft.exercises[0].loggedSets.first?.id)
@@ -88,8 +82,7 @@ final class ActiveWorkoutDraftTests: XCTestCase {
             for: exerciseID,
             repsText: "",
             weightText: "",
-            rpe: nil,
-            notes: ""
+            rpe: nil
         )
 
         XCTAssertTrue(draft.exercises[0].loggedSets.isEmpty)
@@ -105,10 +98,35 @@ final class ActiveWorkoutDraftTests: XCTestCase {
             for: exerciseID,
             repsText: "   ",
             weightText: "  ",
-            rpe: nil,
-            notes: "   "
+            rpe: nil
         )
 
         XCTAssertTrue(draft.exercises[0].loggedSets.isEmpty)
+    }
+
+    func testTreatsRPEOnlyInputAsMaterializedPendingSet() throws {
+        var draft = ActiveWorkoutDraft.makeEmpty()
+        draft.addExercise(named: "Incline Curl")
+        let exerciseID = try XCTUnwrap(draft.exercises.first?.id)
+
+        draft.updateDraftSet(
+            for: exerciseID,
+            repsText: "",
+            weightText: "",
+            rpe: 8
+        )
+
+        XCTAssertEqual(draft.exercises[0].loggedSets.count, 1)
+        XCTAssertEqual(draft.exercises[0].loggedSets[0].rpe, 8)
+    }
+
+    func testStoresExerciseNotesOnDraftExercise() throws {
+        var draft = ActiveWorkoutDraft.makeEmpty()
+        draft.addExercise(named: "Bench Press")
+        let exerciseID = try XCTUnwrap(draft.exercises.first?.id)
+
+        draft.updateExerciseNotes(for: exerciseID, notes: "Harder to grip the hex DB")
+
+        XCTAssertEqual(draft.exercises[0].notes, "Harder to grip the hex DB")
     }
 }

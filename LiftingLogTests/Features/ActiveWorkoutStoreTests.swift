@@ -68,8 +68,7 @@ final class ActiveWorkoutStoreTests: XCTestCase {
                 for: benchID,
                 repsText: "5",
                 weightText: "225",
-                rpe: .some(8),
-                notes: ""
+                rpe: .some(8)
             )
             activeStore.completePendingSet(for: benchID)
         }
@@ -93,8 +92,7 @@ final class ActiveWorkoutStoreTests: XCTestCase {
             for: benchID,
             repsText: "5",
             weightText: "225",
-            rpe: .some(8),
-            notes: ""
+            rpe: .some(8)
         )
 
         XCTAssertFalse(activeStore.finishWorkout(now: Date(timeIntervalSince1970: 2_100)))
@@ -115,23 +113,20 @@ final class ActiveWorkoutStoreTests: XCTestCase {
             for: benchID,
             repsText: "5",
             weightText: "225",
-            rpe: .some(8),
-            notes: ""
+            rpe: .some(8)
         )
         activeStore.completePendingSet(for: benchID)
         activeStore.updateEditableSet(
             for: benchID,
             repsText: "3",
             weightText: "245",
-            rpe: .some(9),
-            notes: "pending"
+            rpe: .some(9)
         )
 
         activeStore.updateEditableSet(
             for: deadliftID,
             repsText: "5",
-            weightText: "315",
-            notes: ""
+            weightText: "315"
         )
 
         XCTAssertTrue(activeStore.finishWorkout(now: Date(timeIntervalSince1970: 2_100)))
@@ -154,8 +149,7 @@ final class ActiveWorkoutStoreTests: XCTestCase {
             for: benchID,
             repsText: "5",
             weightText: "225",
-            rpe: .some(8),
-            notes: ""
+            rpe: .some(8)
         )
         XCTAssertEqual(activeStore.editableSet(for: benchID).rpe, 8)
 
@@ -185,6 +179,27 @@ final class ActiveWorkoutStoreTests: XCTestCase {
             activeStore.backingStore.recentExercises.prefix(3).map(\.name),
             store.recentExercises.prefix(3).map(\.name)
         )
+    }
+
+    func testFinishWorkoutPersistsExerciseNotes() throws {
+        let activeStore = ActiveWorkoutStore(
+            store: MockWorkoutStore(workouts: [], recentExercises: []),
+            now: Date(timeIntervalSinceReferenceDate: 1_000)
+        )
+        XCTAssertTrue(activeStore.addExercise(named: "Bench Press"))
+        let exerciseID = try XCTUnwrap(activeStore.draft.exercises.first?.id)
+
+        activeStore.updateEditableSet(
+            for: exerciseID,
+            repsText: "5",
+            weightText: "225",
+            rpe: .some(8)
+        )
+        activeStore.completePendingSet(for: exerciseID)
+        activeStore.updateExerciseNotes(for: exerciseID, notes: "Paused first rep")
+
+        XCTAssertTrue(activeStore.finishWorkout(now: Date(timeIntervalSinceReferenceDate: 1_120)))
+        XCTAssertEqual(activeStore.finishedWorkout?.exercises.first?.notes, "Paused first rep")
     }
 
     func testPriorPerformanceSummaryReturnsTheMostRecentMatchingExercise() throws {

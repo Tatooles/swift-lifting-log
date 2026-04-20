@@ -158,18 +158,17 @@ private func activeWorkoutFilledPreviewStore() -> ActiveWorkoutStore {
             for: benchPressID,
             repsText: "5",
             weightText: "225",
-            rpe: .some(8.0),
-            notes: ""
+            rpe: .some(8.0)
         )
         store.completePendingSet(for: benchPressID)
         store.updateEditableSet(
             for: benchPressID,
             repsText: "5",
             weightText: "225",
-            rpe: .some(8.5),
-            notes: "Moved cleanly."
+            rpe: .some(8.5)
         )
         store.completePendingSet(for: benchPressID)
+        store.updateExerciseNotes(for: benchPressID, notes: "Moved cleanly and stayed tucked.")
     }
 
     store.addExercise(named: "Weighted Pull-Up")
@@ -178,17 +177,16 @@ private func activeWorkoutFilledPreviewStore() -> ActiveWorkoutStore {
             for: pullUpID,
             repsText: "6",
             weightText: "45",
-            rpe: .some(8.0),
-            notes: ""
+            rpe: .some(8.0)
         )
         store.completePendingSet(for: pullUpID)
         store.updateEditableSet(
             for: pullUpID,
             repsText: "6",
             weightText: "45",
-            rpe: .some(8.5),
-            notes: "One rep left."
+            rpe: .some(8.5)
         )
+        store.updateExerciseNotes(for: pullUpID, notes: "One rep left.")
         store.toggleExpandedExercise(pullUpID)
     }
 

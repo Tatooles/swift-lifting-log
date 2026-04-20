@@ -75,8 +75,7 @@ final class ActiveWorkoutStore: Identifiable {
             return DraftSet(
                 repsText: pendingSet.repsText,
                 weightText: pendingSet.weightText,
-                rpe: pendingSet.rpe,
-                notes: pendingSet.notes
+                rpe: pendingSet.rpe
             )
         }
 
@@ -141,7 +140,7 @@ final class ActiveWorkoutStore: Identifiable {
         repsText: String? = nil,
         weightText: String? = nil,
         rpe: Double?? = nil,
-        notes: String? = nil
+        notes _: String? = nil
     ) {
         let current = editableSet(for: exerciseID)
 
@@ -149,9 +148,12 @@ final class ActiveWorkoutStore: Identifiable {
             for: exerciseID,
             repsText: repsText ?? current.repsText,
             weightText: weightText ?? current.weightText,
-            rpe: rpe ?? current.rpe,
-            notes: notes ?? current.notes
+            rpe: rpe ?? current.rpe
         )
+    }
+
+    func updateExerciseNotes(for exerciseID: UUID, notes: String) {
+        draft.updateExerciseNotes(for: exerciseID, notes: notes)
     }
 
     func completePendingSet(for exerciseID: UUID) {
@@ -180,7 +182,7 @@ final class ActiveWorkoutStore: Identifiable {
                 id: exercise.id,
                 name: exercise.name,
                 sets: completedSets,
-                notes: ""
+                notes: exercise.notes
             )
         }
 

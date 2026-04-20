@@ -1,59 +1,49 @@
 import SwiftUI
 
+enum RPETextMapper {
+    static func text(for value: Double?) -> String {
+        guard let value else {
+            return ""
+        }
+
+        let hasFraction = value != value.rounded(.towardZero)
+        return value.formatted(.number.precision(.fractionLength(hasFraction ? 1 : 0)))
+    }
+
+    static func value(from text: String) -> Double? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return nil
+        }
+
+        return Double(trimmed)
+    }
+}
+
 struct RPEControl: View {
     let selectedRPE: Double?
     let onSelect: (Double?) -> Void
 
-    private let values: [Double] = [6, 7, 8, 9, 10]
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("RPE")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.secondary)
-
-                Spacer()
-
-                if selectedRPE != nil {
-                    Button("Clear") {
-                        onSelect(nil)
-                    }
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(AppTheme.accent)
-                }
-            }
-
-            HStack(spacing: 8) {
-                ForEach(values, id: \.self) { value in
-                    Button {
-                        onSelect(value)
-                    } label: {
-                        Text(value.formatted(.number.precision(.fractionLength(0))))
-                            .font(.subheadline.weight(.semibold))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(backgroundShape(for: value))
-                            .foregroundStyle(selectedRPE == value ? .white : .primary)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func backgroundShape(for value: Double) -> some View {
-        let isSelected = selectedRPE == value
-        let shape = RoundedRectangle(cornerRadius: 14, style: .continuous)
-
-        if isSelected {
-            shape
-                .fill(AppTheme.accent.gradient)
-        } else {
-            shape
+        TextField(
+            "RPE",
+            text: Binding(
+                get: { RPETextMapper.text(for: selectedRPE) },
+                set: { onSelect(RPETextMapper.value(from: $0)) }
+            )
+        )
+        .textInputAutocapitalization(.never)
+        .keyboardType(.decimalPad)
+        .font(.subheadline.weight(.semibold))
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity, minHeight: 36)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(Color(.tertiarySystemGroupedBackground))
-        }
+        )
+        .accessibilityLabel("RPE")
     }
 }
 

@@ -5,128 +5,82 @@ struct SetRowView: View {
     let repsText: String
     let weightText: String
     let rpe: Double?
-    let notesText: String
     var isEditable = false
     var onRepsChange: (String) -> Void = { _ in }
     var onWeightChange: (String) -> Void = { _ in }
     var onRPEChange: (Double?) -> Void = { _ in }
-    var onNotesChange: (String) -> Void = { _ in }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Set \(setNumber)")
-                .font(.subheadline.weight(.semibold))
+        HStack(spacing: 10) {
+            Text("\(setNumber)")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .frame(width: 18)
 
             if isEditable {
-                HStack(spacing: 12) {
-                    entryField(
-                        title: "Reps",
-                        text: repsText,
-                        keyboardType: .numberPad,
-                        onChange: onRepsChange
-                    )
+                metricField(
+                    placeholder: "Wt",
+                    text: weightText,
+                    keyboardType: .decimalPad,
+                    onChange: onWeightChange
+                )
 
-                    entryField(
-                        title: "Weight",
-                        text: weightText,
-                        keyboardType: .decimalPad,
-                        onChange: onWeightChange
-                    )
-                }
+                metricField(
+                    placeholder: "Reps",
+                    text: repsText,
+                    keyboardType: .numberPad,
+                    onChange: onRepsChange
+                )
 
                 RPEControl(selectedRPE: rpe, onSelect: onRPEChange)
-
-                notesField
             } else {
-                HStack(spacing: 10) {
-                    valueChip(title: repsText.isEmpty ? "No reps" : "\(repsText) reps")
+                metricValue(weightText.isEmpty ? "Wt" : weightText)
+                metricValue(repsText.isEmpty ? "Reps" : repsText)
 
-                    if !weightText.isEmpty {
-                        valueChip(title: weightText)
-                    }
-
-                    if let rpe {
-                        valueChip(
-                            title: "RPE \(rpe.formatted(.number.precision(.fractionLength(1))))"
-                        )
-                    }
-
-                    Spacer()
-                }
-
-                if !notesText.isEmpty {
-                    Text(notesText)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
+                metricValue(rpe.map(RPETextMapper.text(for:)) ?? "RPE")
             }
         }
-        .padding(14)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
         .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .fill(Color(.systemBackground))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .strokeBorder(Color(.separator).opacity(0.22), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(Color(.separator).opacity(0.18), lineWidth: 1)
         )
     }
 
-    private func entryField(
-        title: String,
+    private func metricField(
+        placeholder: String,
         text: String,
         keyboardType: UIKeyboardType,
         onChange: @escaping (String) -> Void
     ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-
-            TextField(title, text: Binding(get: { text }, set: onChange))
-                .textInputAutocapitalization(.never)
-                .keyboardType(keyboardType)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(Color(.tertiarySystemGroupedBackground))
-                )
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private func valueChip(title: String) -> some View {
-        Text(title)
-            .font(.footnote.weight(.semibold))
+        TextField(placeholder, text: Binding(get: { text }, set: onChange))
+            .textInputAutocapitalization(.never)
+            .keyboardType(keyboardType)
+            .font(.subheadline.weight(.semibold))
+            .multilineTextAlignment(.center)
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, minHeight: 36)
             .background(
-                Capsule(style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(Color(.tertiarySystemGroupedBackground))
             )
     }
 
-    private var notesField: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Notes")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-
-            TextField(
-                "Optional set note",
-                text: Binding(get: { notesText }, set: onNotesChange),
-                axis: .vertical
-            )
-            .lineLimit(1 ... 3)
-            .textInputAutocapitalization(.sentences)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+    private func metricValue(_ value: String) -> some View {
+        Text(value)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(value == "Wt" || value == "Reps" || value == "RPE" ? .secondary : .primary)
+            .frame(maxWidth: .infinity, minHeight: 36)
             .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(Color(.tertiarySystemGroupedBackground))
             )
-        }
     }
 }
 
@@ -137,7 +91,6 @@ struct SetRowView: View {
             repsText: "5",
             weightText: "225",
             rpe: 8,
-            notesText: "Paused first rep.",
             isEditable: false
         )
 
@@ -146,7 +99,6 @@ struct SetRowView: View {
             repsText: "",
             weightText: "",
             rpe: nil,
-            notesText: "",
             isEditable: true
         )
     }

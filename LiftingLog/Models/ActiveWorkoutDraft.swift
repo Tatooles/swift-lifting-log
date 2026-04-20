@@ -15,7 +15,8 @@ struct ActiveWorkoutDraft: Hashable {
                 id: UUID(),
                 name: name,
                 loggedSets: [],
-                draftSet: DraftSet()
+                draftSet: DraftSet(),
+                notes: ""
             )
         )
     }
@@ -25,7 +26,7 @@ struct ActiveWorkoutDraft: Hashable {
         repsText: String,
         weightText: String,
         rpe: Double?,
-        notes: String
+        notes _: String = ""
     ) {
         guard let index = exercises.firstIndex(where: { $0.id == exerciseID }) else {
             return
@@ -34,8 +35,7 @@ struct ActiveWorkoutDraft: Hashable {
         let proposed = DraftSet(
             repsText: repsText,
             weightText: weightText,
-            rpe: rpe,
-            notes: notes
+            rpe: rpe
         )
 
         if proposed.isBlank {
@@ -51,7 +51,7 @@ struct ActiveWorkoutDraft: Hashable {
             repsText: repsText,
             weightText: weightText,
             rpe: rpe,
-            notes: notes,
+            notes: "",
             isComplete: false
         )
 
@@ -63,6 +63,14 @@ struct ActiveWorkoutDraft: Hashable {
 
         exercises[index].draftSet = DraftSet()
     }
+
+    mutating func updateExerciseNotes(for exerciseID: UUID, notes: String) {
+        guard let index = exercises.firstIndex(where: { $0.id == exerciseID }) else {
+            return
+        }
+
+        exercises[index].notes = notes
+    }
 }
 
 struct DraftExercise: Identifiable, Hashable {
@@ -70,18 +78,18 @@ struct DraftExercise: Identifiable, Hashable {
     var name: String
     var loggedSets: [LoggedSet]
     var draftSet: DraftSet
+    var notes: String
 }
 
 struct DraftSet: Hashable {
     var repsText: String = ""
     var weightText: String = ""
     var rpe: Double?
-    var notes: String = ""
+    var notes: String { "" }
 
     var isBlank: Bool {
         repsText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && weightText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && rpe == nil
-            && notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }

@@ -27,9 +27,9 @@ final class StartWorkoutFlowStateTests: XCTestCase {
             for: exerciseID,
             repsText: "5",
             weightText: "225",
-            rpe: .some(8),
-            notes: "Moved well."
+            rpe: .some(8)
         )
+        activeWorkoutStore.updateExerciseNotes(for: exerciseID, notes: "Moved well.")
         activeWorkoutStore.completePendingSet(for: exerciseID)
         XCTAssertTrue(activeWorkoutStore.finishWorkout(now: Date(timeIntervalSince1970: 2_100)))
 
@@ -37,7 +37,7 @@ final class StartWorkoutFlowStateTests: XCTestCase {
 
         XCTAssertNil(flowState.activeWorkoutStore)
         XCTAssertEqual(flowState.completedWorkout?.name, "Blank Workout")
-        XCTAssertEqual(flowState.completedWorkout?.exercises.first?.sets.first?.notes, "Moved well.")
+        XCTAssertEqual(flowState.completedWorkout?.exercises.first?.notes, "Moved well.")
     }
 }
 
@@ -53,5 +53,24 @@ final class WorkoutDetailDisplayTests: XCTestCase {
         )
 
         XCTAssertEqual(set.repsDisplayText, "? reps")
+    }
+}
+
+final class RPETextMapperTests: XCTestCase {
+    func testFormatsRPEForFieldDisplay() {
+        XCTAssertEqual(RPETextMapper.text(for: 8.5), "8.5")
+        XCTAssertEqual(RPETextMapper.text(for: 8.0), "8")
+        XCTAssertEqual(RPETextMapper.text(for: nil), "")
+    }
+
+    func testParsesBlankOrInvalidTextAsNil() {
+        XCTAssertNil(RPETextMapper.value(from: ""))
+        XCTAssertNil(RPETextMapper.value(from: "  "))
+        XCTAssertNil(RPETextMapper.value(from: "abc"))
+    }
+
+    func testParsesDecimalRPEText() {
+        XCTAssertEqual(RPETextMapper.value(from: "8.5"), 8.5)
+        XCTAssertEqual(RPETextMapper.value(from: "9"), 9.0)
     }
 }
