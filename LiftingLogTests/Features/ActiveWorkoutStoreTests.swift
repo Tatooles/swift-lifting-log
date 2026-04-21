@@ -143,6 +143,46 @@ final class ActiveWorkoutStoreTests: XCTestCase {
         XCTAssertEqual(savedWorkout.exercises[0].sets[0].weightText, "225")
     }
 
+    func testCompletedExerciseCountIncludesOnlyExercisesWithCompletedSets() throws {
+        let store = MockWorkoutStore(workouts: [], recentExercises: [])
+        let activeStore = ActiveWorkoutStore(store: store)
+        activeStore.addExercise(named: "Bench Press")
+        activeStore.addExercise(named: "Deadlift")
+        activeStore.addExercise(named: "Pull-Up")
+
+        let benchID = try XCTUnwrap(activeStore.draft.exercises.first?.id)
+        let deadliftID = try XCTUnwrap(activeStore.draft.exercises.dropFirst().first?.id)
+        let pullUpID = try XCTUnwrap(activeStore.draft.exercises.last?.id)
+
+        activeStore.updateEditableSet(
+            for: benchID,
+            repsText: "5",
+            weightText: "225",
+            rpe: .some(8),
+            notes: ""
+        )
+        activeStore.completePendingSet(for: benchID)
+
+        activeStore.updateEditableSet(
+            for: deadliftID,
+            repsText: "3",
+            weightText: "315",
+            rpe: .some(8.5),
+            notes: ""
+        )
+
+        activeStore.updateEditableSet(
+            for: pullUpID,
+            repsText: "8",
+            weightText: "0",
+            rpe: .some(9),
+            notes: ""
+        )
+        activeStore.completePendingSet(for: pullUpID)
+
+        XCTAssertEqual(activeStore.completedExerciseCount, 2)
+    }
+
     func testClearingEditableSetRPERemovesThePreviousValue() throws {
         let store = MockWorkoutStore(workouts: [], recentExercises: [])
         let activeStore = ActiveWorkoutStore(store: store)

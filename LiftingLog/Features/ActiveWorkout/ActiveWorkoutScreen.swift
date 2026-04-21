@@ -20,16 +20,13 @@ struct ActiveWorkoutScreen: View {
                 }
             }
             .padding(.horizontal, AppTheme.screenPadding)
-            .padding(.top, 12)
+            .padding(.top, 8)
             .padding(.bottom, 112)
         }
         .background(AppTheme.pageBackground.ignoresSafeArea())
-        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
         .safeAreaInset(edge: .top) {
-            WorkoutTimerBar(startedAt: store.startedAt)
-                .padding(.horizontal, AppTheme.screenPadding)
-                .padding(.top, 8)
-                .background(AppTheme.pageBackground.opacity(0.96))
+            sessionBar
         }
         .safeAreaInset(edge: .bottom) {
             bottomBar
@@ -103,32 +100,58 @@ struct ActiveWorkoutScreen: View {
         }
     }
 
-    private var bottomBar: some View {
+    private var sessionBar: some View {
         HStack(spacing: 12) {
-            Button {
-                isExercisePickerPresented = true
-            } label: {
-                Label("Add Exercise", systemImage: "plus")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
+            WorkoutTimerBar(startedAt: store.startedAt)
 
-            Button {
-                if store.finishWorkout() {
-                    onFinish()
-                }
-            } label: {
-                Label("Finish Workout", systemImage: "checkmark.circle.fill")
-                    .frame(maxWidth: .infinity)
+            Text(completedExerciseSummary)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity, alignment: .center)
+
+            Button("Finish") {
+                finishWorkout()
             }
             .buttonStyle(.borderedProminent)
+            .controlSize(.small)
             .tint(AppTheme.accent)
             .disabled(!store.canFinishWorkout)
         }
         .padding(.horizontal, AppTheme.screenPadding)
+        .padding(.top, 8)
+        .padding(.bottom, 10)
+        .background(.bar)
+        .overlay(alignment: .bottom) {
+            Divider()
+        }
+    }
+
+    private var bottomBar: some View {
+        Button {
+            isExercisePickerPresented = true
+        } label: {
+            Label("Add Exercise", systemImage: "plus")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .padding(.horizontal, AppTheme.screenPadding)
         .padding(.top, 12)
         .padding(.bottom, 8)
         .background(.bar)
+    }
+
+    private var completedExerciseSummary: String {
+        let count = store.completedExerciseCount
+        let noun = count == 1 ? "exercise" : "exercises"
+        return "\(count) \(noun) completed"
+    }
+
+    private func finishWorkout() {
+        if store.finishWorkout() {
+            onFinish()
+        }
     }
 }
 

@@ -26,6 +26,14 @@ final class ActiveWorkoutStore: Identifiable {
         }
     }
 
+    var completedExerciseCount: Int {
+        draft.exercises.reduce(into: 0) { count, exercise in
+            if exercise.loggedSets.contains(where: \.isComplete) {
+                count += 1
+            }
+        }
+    }
+
     init(store: MockWorkoutStore, now: Date = .now) {
         self.backingStore = store
         self.draft = .makeEmpty(now: now)

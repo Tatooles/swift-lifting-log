@@ -5,23 +5,14 @@ struct WorkoutTimerBar: View {
 
     var body: some View {
         TimelineView(.periodic(from: startedAt, by: 1)) { context in
-            GlassSurface(cornerRadius: 22, padding: 14, tint: AppTheme.accent.opacity(0.2)) {
-                HStack(spacing: 12) {
-                    Image(systemName: "timer")
-                        .font(.headline.weight(.semibold))
-                        .foregroundStyle(AppTheme.accent)
+            HStack(spacing: 8) {
+                Image(systemName: "timer")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.accent)
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Workout Timer")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
-
-                        Text(elapsedText(since: startedAt, now: context.date))
-                            .font(.title3.monospacedDigit().weight(.semibold))
-                    }
-
-                    Spacer()
-                }
+                Text(elapsedText(since: startedAt, now: context.date))
+                    .font(.headline.monospacedDigit().weight(.semibold))
+                    .foregroundStyle(.primary)
             }
         }
     }
@@ -42,6 +33,6 @@ struct WorkoutTimerBar: View {
 
 #Preview {
     WorkoutTimerBar(startedAt: .now.addingTimeInterval(-812))
-        .padding()
-        .background(AppTheme.pageBackground)
+    .padding()
+    .background(AppTheme.pageBackground)
 }
