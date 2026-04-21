@@ -102,7 +102,7 @@ struct ActiveWorkoutScreen: View {
 
     private var sessionBar: some View {
         HStack(spacing: 12) {
-            WorkoutTimerBar(startedAt: store.startedAt, style: .inline)
+            WorkoutTimerBar(startedAt: store.startedAt)
 
             Text(completedExerciseSummary)
                 .font(.footnote.weight(.semibold))

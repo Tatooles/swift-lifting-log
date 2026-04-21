@@ -6,7 +6,6 @@ struct GlassSurface<Content: View>: View {
     var tint: Color? = nil
     var interactive = false
     var alignment: Alignment = .leading
-    var fullWidth = true
     @ViewBuilder let content: Content
 
     init(
@@ -15,7 +14,6 @@ struct GlassSurface<Content: View>: View {
         tint: Color? = nil,
         interactive: Bool = false,
         alignment: Alignment = .leading,
-        fullWidth: Bool = true,
         @ViewBuilder content: () -> Content
     ) {
         self.cornerRadius = cornerRadius
@@ -23,21 +21,14 @@ struct GlassSurface<Content: View>: View {
         self.tint = tint
         self.interactive = interactive
         self.alignment = alignment
-        self.fullWidth = fullWidth
         self.content = content()
     }
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
 
-        Group {
-            if fullWidth {
-                content
-                    .frame(maxWidth: .infinity, alignment: alignment)
-            } else {
-                content
-            }
-        }
+        content
+            .frame(maxWidth: .infinity, alignment: alignment)
             .padding(padding)
             .background(shape.fill(Color(.secondarySystemGroupedBackground).opacity(0.82)))
             .overlay(
