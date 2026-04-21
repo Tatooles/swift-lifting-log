@@ -1,5 +1,26 @@
 import SwiftUI
 
+struct ExerciseCardPresentation {
+    let headerMetadataTitles: [String]
+    let priorPerformanceHistoryTitle: String?
+    let bottomActionTitles: [String]
+
+    init(
+        completedSetCount: Int,
+        editableSetIsBlank: Bool,
+        hasHistory: Bool
+    ) {
+        if editableSetIsBlank {
+            headerMetadataTitles = []
+        } else {
+            headerMetadataTitles = ["Editing set \(completedSetCount + 1)"]
+        }
+
+        priorPerformanceHistoryTitle = hasHistory ? "Full History" : nil
+        bottomActionTitles = ["Log Set", "Remove"]
+    }
+}
+
 struct ExerciseCardView: View {
     let store: ActiveWorkoutStore
     let exercise: DraftExercise
@@ -24,6 +45,14 @@ struct ExerciseCardView: View {
 
     private var historyEntries: [ExerciseHistoryEntry] {
         store.exerciseHistoryEntries(for: exercise.name)
+    }
+
+    private var presentation: ExerciseCardPresentation {
+        ExerciseCardPresentation(
+            completedSetCount: completedSets.count,
+            editableSetIsBlank: editableSet.isBlank,
+            hasHistory: !historyEntries.isEmpty
+        )
     }
 
     var body: some View {
@@ -63,17 +92,14 @@ struct ExerciseCardView: View {
                         .foregroundStyle(.primary)
                         .multilineTextAlignment(.leading)
 
-                    HStack(spacing: 8) {
-                        MetadataPill(
-                            title: "\(completedSets.count) logged",
-                            systemImage: "checkmark.circle.fill"
-                        )
-
-                        if !editableSet.isBlank {
-                            MetadataPill(
-                                title: "Editing set \(completedSets.count + 1)",
-                                systemImage: "square.and.pencil"
-                            )
+                    if !presentation.headerMetadataTitles.isEmpty {
+                        HStack(spacing: 8) {
+                            ForEach(presentation.headerMetadataTitles, id: \.self) { title in
+                                MetadataPill(
+                                    title: title,
+                                    systemImage: "square.and.pencil"
+                                )
+                            }
                         }
                     }
                 }
@@ -117,24 +143,17 @@ struct ExerciseCardView: View {
             exerciseNotesField
 
             HStack(spacing: 8) {
-                Button("History") {
-                    isHistoryPresented = true
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .disabled(historyEntries.isEmpty)
-
                 Button {
                     store.completePendingSet(for: exercise.id)
                 } label: {
-                    Text("Log Set")
+                    Text(presentation.bottomActionTitles[0])
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(AppTheme.accent)
                 .disabled(editableSet.isBlank)
 
-                Button("Remove", role: .destructive) {
+                Button(presentation.bottomActionTitles[1], role: .destructive) {
                     store.removeExercise(exercise.id)
                 }
                 .buttonStyle(.bordered)
@@ -189,9 +208,21 @@ struct ExerciseCardView: View {
     private var priorPerformanceStrip: some View {
         if let priorPerformanceSummary {
             VStack(alignment: .leading, spacing: 8) {
-                Label("Prior Performance", systemImage: "clock.badge.checkmark")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                HStack(alignment: .top, spacing: 8) {
+                    Label("Prior Performance", systemImage: "clock.badge.checkmark")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    if let title = presentation.priorPerformanceHistoryTitle {
+                        Button(title) {
+                            isHistoryPresented = true
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
+                }
 
                 Text(priorPerformanceSummary.setSummary)
                     .font(.headline)

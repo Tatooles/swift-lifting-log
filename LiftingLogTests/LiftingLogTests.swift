@@ -13,6 +13,32 @@ final class LiftingLogTests: XCTestCase {
     }
 }
 
+final class ExerciseCardPresentationTests: XCTestCase {
+    func testPresentationForEditableSetWithHistory() {
+        let presentation = ExerciseCardPresentation(
+            completedSetCount: 1,
+            editableSetIsBlank: false,
+            hasHistory: true
+        )
+
+        XCTAssertEqual(presentation.headerMetadataTitles, ["Editing set 2"])
+        XCTAssertEqual(presentation.priorPerformanceHistoryTitle, "Full History")
+        XCTAssertEqual(presentation.bottomActionTitles, ["Log Set", "Remove"])
+    }
+
+    func testPresentationForBlankEditableSetWithoutHistory() {
+        let presentation = ExerciseCardPresentation(
+            completedSetCount: 0,
+            editableSetIsBlank: true,
+            hasHistory: false
+        )
+
+        XCTAssertEqual(presentation.headerMetadataTitles, [])
+        XCTAssertNil(presentation.priorPerformanceHistoryTitle)
+        XCTAssertEqual(presentation.bottomActionTitles, ["Log Set", "Remove"])
+    }
+}
+
 final class StartWorkoutFlowStateTests: XCTestCase {
     func testCompletingWorkoutTransitionsFromActiveFlowToCompletionState() throws {
         let flowState = StartWorkoutFlowState()
